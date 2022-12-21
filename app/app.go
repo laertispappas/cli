@@ -10,6 +10,7 @@ import (
 	"github.com/temporalio/cli/client"
 	"github.com/temporalio/cli/cluster"
 	"github.com/temporalio/cli/common"
+	"github.com/temporalio/cli/completion"
 	"github.com/temporalio/cli/env"
 	"github.com/temporalio/cli/headers"
 	"github.com/temporalio/cli/namespace"
@@ -30,6 +31,7 @@ func BuildApp(version string) *cli.App {
 	defaultCfg, _ := sconfig.NewDefaultConfig()
 
 	app := cli.NewApp()
+	app.EnableBashCompletion = true
 	app.Name = "temporal"
 	app.Usage = "Temporal command-line interface and development server"
 	app.Suggest = true
@@ -79,12 +81,19 @@ func HandleError(c *cli.Context, err error) {
 }
 
 func commands(defaultCfg *sconfig.Config) []*cli.Command {
-	return append([]*cli.Command{
+	base := []*cli.Command{
 		{
 			Name:        "server",
 			Usage:       "Commands for managing Temporal server",
 			Subcommands: server.NewServerCommands(defaultCfg),
-		}}, common.WithFlags(clientCommands, common.SharedFlags)...)
+		},
+		{
+			Name:        "completion",
+			Usage:       "Output shell completion code for the specified shell",
+			Subcommands: completion.NewCompletionCommands(),
+		},
+	}
+	return append(base, common.WithFlags(clientCommands, common.SharedFlags)...)
 }
 
 var clientCommands = []*cli.Command{
